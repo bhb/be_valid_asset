@@ -57,6 +57,17 @@ describe 'be_valid_css' do
       ENV.delete('NONET')
     end
 
+    it "should mark test as pending if pending_if_no_net is true" do
+      BeValidAsset::Configuration.pending_if_no_net = true
+      
+      css = get_file('valid.css')
+      lambda {
+        css.should be_valid_css
+      }.should raise_error(Spec::Example::ExamplePendingError)
+
+      BeValidAsset::Configuration.pending_if_no_net = false
+    end
+
     describe "CSS version" do
       (1..3).each do |version|
         describe version.to_s do
@@ -145,7 +156,7 @@ describe 'be_valid_css' do
       Dir.glob(BeValidAsset::Configuration.cache_path + '/*').size.should eql(count)
     end
 
-    it "should use the cached result (if available) when network tests disabled" do
+    it "should use the cached result (if available) when network tests disabled by environment" do
       css = get_file('valid.css')
       css.should be_valid_css
 
@@ -157,7 +168,19 @@ describe 'be_valid_css' do
       ENV.delete('NONET')
     end
 
-    it "should mark test as pending if network tests are disabled, and no cached result is available" do
+    it "should use the cached result (if available) when network tests disabled by configuration" do
+      css = get_file('valid.css')
+      css.should be_valid_css
+
+      BeValidAsset::Configuration.pending_if_no_net = true
+
+      Net::HTTP.should_not_receive(:start)
+      css.should be_valid_css
+
+      BeValidAsset::Configuration.pending_if_no_net = false
+    end
+
+    it "should mark test as pending if network tests are disabled by environment, and no cached result is available" do
       ENV['NONET'] = 'true'
 
       css = get_file('valid.css')
@@ -166,6 +189,17 @@ describe 'be_valid_css' do
       }.should raise_error(Spec::Example::ExamplePendingError)
 
       ENV.delete('NONET')
+    end
+
+    it "should mark test as pending if network tests are disabled by configuration, and no cached result is available" do
+      BeValidAsset::Configuration.pending_if_no_net = true
+
+      css = get_file('valid.css')
+      lambda {
+        css.should be_valid_css
+      }.should raise_error(Spec::Example::ExamplePendingError)
+
+      BeValidAsset::Configuration.pending_if_no_net = false
     end
   end
 end

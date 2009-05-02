@@ -83,7 +83,7 @@ describe 'be_valid_xhtml' do
       }.should raise_error
     end
 
-    it "should mark test as pending if network tests are disabled" do
+    it "should mark test as pending if network tests are disabled by environment" do
       ENV['NONET'] = 'true'
 
       html = get_file('valid.html')
@@ -93,6 +93,16 @@ describe 'be_valid_xhtml' do
 
       ENV.delete('NONET')
     end
+
+    it "should mark test as pending if network tests are disabled by configuration" do
+      BeValidAsset::Configuration.pending_if_no_net = true
+      html = get_file('valid.html')
+      lambda {
+        html.should be_valid_xhtml
+      }.should raise_error(Spec::Example::ExamplePendingError)
+      BeValidAsset::Configuration.pending_if_no_net = false
+    end
+    
   end
   
   describe "with caching" do
@@ -165,7 +175,7 @@ describe 'be_valid_xhtml' do
       Dir.glob(BeValidAsset::Configuration.cache_path + '/*').size.should eql(count)
     end
 
-    it "should use the cached result (if available) when network tests disabled" do
+    it "should use the cached result (if available) when network tests disabled by environment" do
       html = get_file('valid.html')
       html.should be_valid_xhtml
 
@@ -177,7 +187,19 @@ describe 'be_valid_xhtml' do
       ENV.delete('NONET')
     end
 
-    it "should mark test as pending if network tests are disabled, and no cached result is available" do
+    it "should use the cached result (if available) when network tests disabled by configuration" do
+      html = get_file('valid.html')
+      html.should be_valid_xhtml
+
+      BeValidAsset::Configuration.pending_if_no_net = true
+
+      Net::HTTP.should_not_receive(:start)
+      html.should be_valid_xhtml
+
+      BeValidAsset::Configuration.pending_if_no_net = false
+    end
+
+    it "should mark test as pending if network tests are disabled by environment, and no cached result is available" do
       ENV['NONET'] = 'true'
 
       html = get_file('valid.html')
@@ -186,6 +208,17 @@ describe 'be_valid_xhtml' do
       }.should raise_error(Spec::Example::ExamplePendingError)
 
       ENV.delete('NONET')
+    end
+
+    it "should mark test as pending if network tests are disabled by configuration, and no cached result is available" do
+      BeValidAsset::Configuration.pending_if_no_net = true
+
+      html = get_file('valid.html')
+      lambda {
+        html.should be_valid_xhtml
+      }.should raise_error(Spec::Example::ExamplePendingError)
+
+      BeValidAsset::Configuration.pending_if_no_net = false
     end
   end
 end

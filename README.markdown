@@ -72,7 +72,11 @@ be\_valid\_css takes an optional parameter specifying the css profile to test ag
 
 ### Disabling network tests
 
-If the environment variable `NONET` is set to true, then all tests with no cached response available will be marked as pending.
+If the environment variable `NONET` is set to true, then all tests with no cached response available will be marked as pending. 
+
+The same effect can be achieved by setting the configuration option `pending_if_no_net`:
+
+    BeValidAsset::Configuration.pending_if_no_net = true
 
 Configuration
 -------------

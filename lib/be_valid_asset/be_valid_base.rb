@@ -1,13 +1,13 @@
 
 module BeValidAsset
-
+  
   # Abstract base class for other matchers
   class BeValidBase
 
     private
 
       def check_net_enabled
-        if ENV["NONET"] == 'true'
+        if ENV["NONET"] == 'true' || Configuration.pending_if_no_net
           raise Spec::Example::ExamplePendingError.new('Network tests disabled')
         end
       end
