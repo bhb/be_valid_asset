@@ -18,9 +18,8 @@ module BeValidAsset
     # Assert that markup (html/xhtml) is valid according the W3C validator web service.
   
     def matches?(fragment)
-
       if fragment.respond_to? :body
-        fragment = fragment.body
+        fragment = fragment.body.to_s
       end
           
       if fragment.empty?

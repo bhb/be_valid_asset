@@ -11,11 +11,16 @@ describe 'be_valid_xhtml' do
       html = get_file('valid.html')
       html.should be_valid_xhtml
     end
-  
+   
     it "should validate a valid response" do
       response = MockResponse.new(get_file('valid.html'))
       response.should be_valid_xhtml
     end
+
+    it "should validate if body is not a string but can be converted to valid string" do
+      response = MockResponse.new(stub("XHTML", :to_s => get_file('valid.html')))
+      response.should be_valid_xhtml
+    end 
 
     it "should validate a valid fragment" do
       "<p>This is a Fragment</p>".should be_valid_xhtml_fragment
@@ -65,7 +70,7 @@ describe 'be_valid_xhtml' do
       }.should raise_error(SpecFailed)
     end
 
-    it "should fail unless resposne is HTTP OK" do
+    it "should fail unless response is HTTP OK" do
       html = get_file('valid.html')
 
       r = Net::HTTPServiceUnavailable.new('1.1', 503, 'Service Unavailable')
