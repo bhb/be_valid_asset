@@ -1,5 +1,3 @@
-require 'rubygems'
-
 Gem::Specification.new do |s|
   s.name = "be_valid_asset"
   s.version = "1.0.0"
